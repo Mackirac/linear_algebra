@@ -4,26 +4,26 @@ use std::cmp::PartialOrd;
 use std::fmt;
 
 #[derive(Clone, PartialEq)]
-pub struct Vector <T: Number> {
+pub struct Vector <T> {
     dims : usize,
     vals : Box<[T]>
 }
 
-impl <T: Number> Index<usize> for Vector<T> {
+impl <T> Index<usize> for Vector<T> {
     type Output = T;
     fn index(&self, index: usize) -> &T {
         if index == 0 { panic!("Index out of bonds") }
         &self.vals[index - 1]
     }
 }
-impl <T: Number> IndexMut<usize> for Vector<T> {
+impl <T> IndexMut<usize> for Vector<T> {
     fn index_mut(&mut self, index: usize) -> &mut T {
         if index == 0 { panic!("Index out of bonds") }
         &mut self.vals[index - 1]
     }
 }
 
-impl <T: Number> Vector<T> {
+impl <T> Vector<T> {
     pub fn dims(&self) -> usize { self.dims }
 
     pub fn new(dims: usize, f: impl Fn(usize)->T) -> Vector<T> {
@@ -41,13 +41,13 @@ impl <T: Number> Vector<T> {
     }
 }
 
-impl <T: Number + Clone> Vector<T> {
+impl <T: Clone> Vector<T> {
     pub fn repeat(val: T, dims: usize) -> Vector<T> {
         Vector::new(dims, |_| { val.clone() })
     }
 
     pub fn scalar_product <U, V> (v1: Vector<T>, v2: Vector<U>) -> V
-    where T: Mul<U, Output=V>, U: Number + Clone, V: Number + Add<V, Output=V>
+    where T: Mul<U, Output=V>, U: Clone, V: Number + Add<V, Output=V>
     {
         let mut s = V::zero();
         for i in 1..v1.dims+1 {
@@ -80,9 +80,8 @@ impl <T, IE, FE> Vector<T> where
 
 // SOMA ENTRE VETORES
 impl <T, U, V> Add<Vector<U>> for Vector<T> where
-    T: Number + Add<U, Output=V> + Clone,
-    U: Number + Clone,
-    V: Number
+    T: Add<U, Output=V> + Clone,
+    U: Clone
 {
     type Output = Vector<V>;
     fn add(self, other: Vector<U>) -> Vector<V> {
@@ -93,9 +92,8 @@ impl <T, U, V> Add<Vector<U>> for Vector<T> where
 
 // DIFERENÇA ENTRE VETORES
 impl <T, U, V> Sub<Vector<U>> for Vector<T> where
-    T: Number + Sub<U, Output=V> + Clone,
-    U: Number + Clone,
-    V: Number
+    T: Sub<U, Output=V> + Clone,
+    U: Clone
 {
     type Output = Vector<V>;
     fn sub(self, other: Vector<U>) -> Vector<V> {
@@ -106,9 +104,8 @@ impl <T, U, V> Sub<Vector<U>> for Vector<T> where
 
 // PRODUTO DE VETOR POR ESCALAR
 impl <T, U, V> Mul<U> for Vector<T> where
-    T: Mul<U, Output=V> + Number + Clone,
-    U: Clone,
-    V: Number
+    T: Mul<U, Output=V> + Clone,
+    U: Clone
 {
     type Output = Vector<V>;
     fn mul(self, scalar: U) -> Vector<V> {
@@ -117,7 +114,7 @@ impl <T, U, V> Mul<U> for Vector<T> where
 }
 
 impl <T> fmt::Debug for Vector<T> where
-    T: Number + fmt::Debug
+    T: fmt::Debug
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut buffer = String::new();
